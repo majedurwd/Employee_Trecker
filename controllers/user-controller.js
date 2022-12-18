@@ -39,7 +39,7 @@ const registerUser = async (req, res, next) => {
         await registerUserData.save();
 
         // Send Mail
-        await sendEmail({
+        sendEmail({
             email: email,
             subject: "Email Verification",
             message,
@@ -321,9 +321,9 @@ const updateEmergencyContact = async (req, res, next) => {
     }
 };
 
-const testing = (req, res) => {
-    res.json(req.body);
-};
+// const testing = (req, res) => {
+//     res.json(req.body);
+// };
 
 module.exports = {
     registerUser,
@@ -335,5 +335,5 @@ module.exports = {
     forgetPassowrdOtpSender,
     userUpdateDetails,
     updateEmergencyContact,
-    testing,
+    // testing,
 };

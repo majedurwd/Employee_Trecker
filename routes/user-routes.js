@@ -27,7 +27,7 @@ router.post(
     userControllers.registerUser
 );
 
-router.post("/testing", require("../controllers/user-controller").testing);
+// router.post("/testing", require("../controllers/user-controller").testing);
 
 router.post("/resister", (req, res) => {
     res.status(200).json(req.body);
