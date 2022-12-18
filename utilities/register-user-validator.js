@@ -1,0 +1,49 @@
+
+const { check, validationResult } = require("express-validator")
+
+const registerUserValidator = [
+    check("email", "Email is required")
+        .isEmail()
+        .withMessage("Invalid email address")
+        .notEmpty()
+        .withMessage("Email is required")
+        .trim(),
+    check("password", "Password is required")
+        .trim()
+        .notEmpty()
+        .withMessage("Password is required")
+        .isLength({ min: 6 })
+        .withMessage("password must be minimum 6 length")
+        .matches(/(?=.*?[A-Z])/)
+        .withMessage("At least one Uppercase")
+        .matches(/(?=.*?[a-z])/)
+        .withMessage("At least one Lowercase")
+        .matches(/(?=.*?[0-9])/)
+        .withMessage("At least one Number")
+        .matches(/(?=.*?[#?!@$%^&*-])/)
+        .withMessage("At least one special character")
+        .not()
+        .matches(/^$|\s+/)
+        .withMessage("White space not allowed"),
+    check("deviceId", "Device Id is required")
+        .notEmpty()
+        .withMessage("Device Id is required")
+        .trim()
+    
+]
+
+const registerUserValidationHandler = (req, res, next) => {
+    const errors = validationResult(req);
+    const mappedErrors = errors.mapped();
+    if (Object.keys(mappedErrors).length === 0) return next();
+
+    res.status(406).json({
+        success: false,
+        mappedErrors,
+    })
+}
+
+module.exports = {
+    registerUserValidator,
+    registerUserValidationHandler
+}
