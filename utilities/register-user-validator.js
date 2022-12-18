@@ -1,4 +1,5 @@
 const { check, validationResult } = require("express-validator");
+const RegisterUser = require("../models/RegisterUser")
 
 const registerUserValidator = [
     check("email", "Email is required")
@@ -6,6 +7,10 @@ const registerUserValidator = [
         .withMessage("Invalid email address")
         .notEmpty()
         .withMessage("Email is required")
+        .custom( async (value) => {
+            const useEmail = await RegisterUser.findOne({ email: value })
+            if(useEmail) throw new Error("This email already exist")
+        })
         .trim(),
     check("password", "Password is required")
         .trim()

@@ -42,12 +42,20 @@ const registerUser = async (req, res, next) => {
             message,
         });
 
+        const userData = {
+            email: email,
+            password: hashPassword,
+            deviceId: deviceId,
+            otpExpire: otpExpire,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        };
         // Save data in database
         await registerUserData.save();
 
         res.status(200).json({
             success: true,
-            registerUserData,
+            userData
         });
     } catch (err) {
         next(err);
@@ -177,9 +185,7 @@ const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        const user = await RegisterUser.findOne({
-            $and: [{ _id: req.params.userId }, { email: email }],
-        });
+        const user = await RegisterUser.findOne({ email: email })
 
         // Check email
         if (!user)
@@ -202,7 +208,7 @@ const loginUser = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Forget Password OTP Sender
 const forgetPassowrdOtpSender = async (req, res, next) => {
@@ -293,7 +299,7 @@ const userUpdateDetails = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Update Emergency Contact
 const updateEmergencyContact = async (req, res, next) => {
