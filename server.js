@@ -36,5 +36,5 @@ app.use(routes);
 // Default Error Handler
 app.use(errorHandler);
 
-// Export the Express API
+// Export the Express App
 module.exports = app;
