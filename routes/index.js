@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 const userRoutes = require("./user-routes");
 
-router.get("/", (req, res) => {
+router.get("/", (_req, res) => {
     res.status(200).json({ message: "/ working correctly" });
 });
 

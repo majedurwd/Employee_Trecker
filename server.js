@@ -14,27 +14,27 @@ const app = express();
 // Connection Database and Create Server
 connectDB(DB_URI)
     .then(() => {
-        console.log("Database Connected");
+        console.log("Database Connected")
         // Create Server
         app.listen(APP_PORT, () => {
             console.log(`Server is Running in http://localhost:${APP_PORT}`);
-        });
+        })
     })
     .catch((err) => {
-        console.log(err.message);
+        console.log(err.message)
     });
 
 // Request Parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev"));
-app.use(cors());
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(morgan("dev"))
+app.use(cors())
 
 // Routing Setup
-app.use(routes);
+app.use(routes)
 
 // Default Error Handler
-app.use(errorHandler);
+app.use(errorHandler)
 
 // Export the Express App
-module.exports = app;
+module.exports = app
