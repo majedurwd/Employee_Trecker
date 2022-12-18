@@ -35,19 +35,19 @@ const registerUser = async (req, res, next) => {
             updatedAt: Date.now(),
         });
 
+        // Send Mail
+        await sendEmail({
+            email: email,
+            subject: "Email Verification",
+            message,
+        });
+
         // Save data in database
         await registerUserData.save();
 
         res.status(200).json({
             success: true,
             registerUserData,
-        });
-
-        // Send Mail
-        await sendEmail({
-            email: email,
-            subject: "Email Verification",
-            message,
         });
     } catch (err) {
         next(err);
