@@ -1,13 +1,13 @@
-const router = require("express").Router();
+const router = require("express").Router()
 
-const userRoutes = require("./user-routes");
+const userRoutes = require("./user-routes")
 
 router.get("/", (_req, res) => {
-    res.status(200).json({ message: "/ working correctly" });
+    res.status(200).json({ message: "/ working correctly" })
 });
 
-router.use("/api/user", userRoutes);
+router.use("/api/user", userRoutes)
 
-router.use("/health", require("./health"));
+router.use("/health", require("./health"))
 
-module.exports = router;
+module.exports = router

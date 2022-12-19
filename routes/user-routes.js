@@ -1,5 +1,6 @@
 const router = require("express").Router()
 
+// Import Utili
 const userControllers = require("../controllers/user-controller")
 // Register Validators
 const {
@@ -57,7 +58,7 @@ router.post(
 );
 
 // Login Route
-router.post("/login/:userId", userControllers.loginUser)
+router.post("/login", userControllers.loginUser)
 
 // User Update Details Route
 router.patch(

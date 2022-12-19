@@ -1,13 +1,13 @@
 // External Import
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt")
 
 // Internal Import
-const RegisterUser = require("../models/RegisterUser");
-const UserDetails = require("../models/UserDetails");
-const UserEmergency = require("../models/UserEmergency");
-const customErrorMsg = require("../utilities/custom-error-msg");
-const sendEmail = require("../utilities/send-mail");
-const JwtService = require("../utilities/jwt-service");
+const RegisterUser = require("../models/RegisterUser")
+const UserDetails = require("../models/UserDetails")
+const UserEmergency = require("../models/UserEmergency")
+const customErrorMsg = require("../utilities/custom-error-msg")
+const sendEmail = require("../utilities/send-mail")
+const JwtService = require("../utilities/jwt-service")
 
 // User Register
 const registerUser = async (req, res, next) => {
@@ -23,7 +23,7 @@ const registerUser = async (req, res, next) => {
         const message = `Hello,\n\nPlease use the verification code below on the Apply App \n\nYour OTP: ${varifyOtp}\n\nIf you didn't request this, you can ingore this email or let us know.\n\nThanks!\nApply App`;
 
         // Hashing password
-        const hashPassword = await bcrypt.hash(password, 12);
+        const hashPassword = await bcrypt.hash(password, 12)
 
         const registerUserData = new RegisterUser({
             email: email,
@@ -42,25 +42,21 @@ const registerUser = async (req, res, next) => {
             message,
         });
 
-        const userData = {
-            email: email,
-            password: hashPassword,
-            deviceId: deviceId,
-            otpExpire: otpExpire,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
         // Save data in database
-        await registerUserData.save();
+        await registerUserData.save()
+
+        const registerData = {
+            userId: registerUserData._id,
+        };
 
         res.status(200).json({
             success: true,
-            userData
-        });
+            registerData
+        })
     } catch (err) {
         next(err);
     }
-};
+}
 // Resend OTP
 const resendVarifiactionOtp = async (req, res, next) => {
     try {
@@ -100,7 +96,7 @@ const resendVarifiactionOtp = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 // Email Verification
 const mailVerifiacation = async (req, res, next) => {
     try {
@@ -130,7 +126,7 @@ const mailVerifiacation = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 // User Details
 const userDetails = async (req, res, next) => {
     try {
@@ -154,7 +150,7 @@ const userDetails = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Emergency contact
 const userEmergency = async (req, res, next) => {
@@ -178,32 +174,36 @@ const userEmergency = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Login
 const loginUser = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body
 
         const user = await RegisterUser.findOne({ email: email })
 
         // Check email
         if (!user)
-            return next(customErrorMsg.notAccept("Worng email or password"));
+            return next(customErrorMsg.notAccept("Worng email or password"))
 
         // Match Password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch)
-            return next(customErrorMsg.notAccept("Worng email or password"));
+            return next(customErrorMsg.notAccept("Worng email or password"))
 
         const payload = {
             id: user._id,
             email: user.email,
         };
         const accessToken = JwtService.sign(payload);
+        const userDetails = await UserDetails.findOne({ email: email });
+        const userEmergency = await UserEmergency.findOne({userId: userDetails.userId})
         res.status(200).json({
             success: true,
             token: accessToken,
+            userDetails,
+            userEmergency,
         });
     } catch (err) {
         next(err);
@@ -246,7 +246,7 @@ const forgetPassowrdOtpSender = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Forget Password
 const forgetPassword = async (req, res, next) => {
@@ -262,7 +262,7 @@ const forgetPassword = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
+}
 
 // User Update Details
 const userUpdateDetails = async (req, res, next) => {
@@ -325,11 +325,7 @@ const updateEmergencyContact = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-};
-
-// const testing = (req, res) => {
-//     res.json(req.body);
-// };
+}
 
 module.exports = {
     registerUser,
@@ -341,5 +337,4 @@ module.exports = {
     forgetPassowrdOtpSender,
     userUpdateDetails,
     updateEmergencyContact,
-    // testing,
-};
+}
