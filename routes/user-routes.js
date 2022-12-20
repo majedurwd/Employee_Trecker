@@ -1,27 +1,27 @@
-const router = require("express").Router()
+const router = require("express").Router();
 
 // Import Utili
-const userControllers = require("../controllers/user-controller")
+const userControllers = require("../controllers/user-controller");
 // Register Validators
 const {
     registerUserValidator,
     registerUserValidationHandler,
-} = require("../utilities/register-user-validator")
+} = require("../utilities/register-user-validator");
 
 // User Details Validators
 const {
     userDetailsValidator,
     userDetailsValidationHandler,
-} = require("../utilities/user-details-validator")
+} = require("../utilities/user-details-validator");
 
 // User Emergency Validators
 const {
     userEmergencyValidator,
     userEmergencyValidationHandler,
-} = require("../utilities/user-emergency-validator")
+} = require("../utilities/user-emergency-validator");
 
 // Import User Authenticated Middleware
-const { isAuthenticated } = require("../middlewares/is-autenticated")
+const { isAuthenticated, authorizeRoles, singleUserAuthenticate } = require("../middlewares/is-autenticated");
 
 // Register Route
 router.post(
@@ -36,10 +36,10 @@ router.post("/resister", (req, res) => {
 });
 
 // Resend Verification Route
-router.put("/resend/:userId", userControllers.resendVarifiactionOtp)
+router.put("/resend/:userId", userControllers.resendVarifiactionOtp);
 
 // Email Verification Route
-router.post("/verify/:userId", userControllers.mailVerifiacation)
+router.post("/verify/:userId", userControllers.mailVerifiacation);
 
 // User Details Route
 router.post(
@@ -58,7 +58,7 @@ router.post(
 );
 
 // Login Route
-router.post("/login", userControllers.loginUser)
+router.post("/login", userControllers.loginUser);
 
 // User Update Details Route
 router.patch(
@@ -67,11 +67,28 @@ router.patch(
     userControllers.userUpdateDetails
 );
 
+router.put("")
+
 // User Update Emergency Contact Route
 router.patch(
     "/emergency/update/:userId",
     isAuthenticated,
     userControllers.updateEmergencyContact
 );
+
+// User Delete Route
+router.delete("/delete/:userId", userControllers.deleteUser);
+
+// Get Single User Route
+router.get("/singleUser", singleUserAuthenticate, userControllers.getSingleUser)
+
+// Forget Password OTP Sender Route
+router.post("/send/forgetOtp", userControllers.forgetPassowrdOtpSender)
+
+// Forget Password OTP Checker Route
+router.post("/check/forgetOtp/:userId", userControllers.forgetPasswordOtpChecker)
+
+// Forget Password
+router.post("/forget/:userId", userControllers.changePassword)
 
 module.exports = router;

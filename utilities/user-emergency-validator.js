@@ -11,27 +11,18 @@ const userEmergencyValidator = [
         .isString()
         .notEmpty()
         .withMessage("First name is required")
-        .isLength({ min: 2 })
-        .withMessage("First name must be two characters long")
         .trim(),
     check("middleName", "Middle name is required")
         .isString()
         .notEmpty()
         .withMessage("Middle name is required")
-        .isLength({ min: 2 })
-        .withMessage("Middle name must be two characters long")
         .trim(),
     check("surName", "Sur name is required")
         .isString()
         .notEmpty()
         .withMessage("Sur name is required")
-        .isLength({ min: 2 })
-        .withMessage("Sur name must be two characters long")
         .trim(),
     check("phone", "Telephone number is required")
-        .isMobilePhone("any", {
-            strictMode: true,
-        })
         .notEmpty()
         .withMessage("Telephone number is required")
         .trim(),

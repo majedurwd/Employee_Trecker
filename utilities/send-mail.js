@@ -1,6 +1,6 @@
 
 const nodmailer = require("nodemailer")
-const { SMTP_SERVICE, SMTP_MAIL, SMTP_PASSWORD, SMTP_HOST, SMTP_PORT } = require("../config")
+const { SMTP_SERVICE, SMTP_HOST, SMTP_PORT } = require("../config")
 
 
 const sendEmail = async (options) => {
@@ -11,11 +11,11 @@ const sendEmail = async (options) => {
         service: SMTP_SERVICE,
         auth: {
             // Your Email
-            user: SMTP_MAIL,
-            // Your Password or App Password 
-            pass: SMTP_PASSWORD
-        }
-    })
+            user: "noreply.applyapp@gmail.com",
+            // Your Password or App Password
+            pass: "d i r h a h a p r h a s u y t p",
+        },
+    });
 
     const mailOptions = {
         from: SMTP_MAIL,

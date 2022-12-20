@@ -4,7 +4,8 @@ const registerSchema = new Schema({
     email: {
         type: String,
         require: true,
-        unique: true
+        // unique: [true, "this email already exist"]
+        unique: false,
     },
     password: {
         type: String,
@@ -18,15 +19,28 @@ const registerSchema = new Schema({
     },
     isVerified: {
         type: Boolean,
-        default: false
+        default: false,
+    },
+    roles: {
+        type: [String],
+        enum: ["USER", "MANAGER", "ADMINISTRATOR"],
+        default: ["USER"],
+    },
+    active: {
+        type: Boolean,
+        default: true
     },
     otp: Number,
     otpExpire: Date,
     forgetOtp: Number,
     forgetOtpExpire: Date,
+    forgetVerify: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: Date,
     updatedAt: Date,
-})
+});
 
 
 const RegisterUser = model("RegisterUser", registerSchema)
