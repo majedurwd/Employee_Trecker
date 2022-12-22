@@ -3,14 +3,12 @@ const bcrypt = require("bcrypt");
 
 // Internal Import
 const RegisterUser = require("../models/RegisterUser");
-const UserDetails = require("../models/UserDetails");
-const UserEmergency = require("../models/UserEmergency");
-const Location = require("../models/Location")
+const UserProfile = require("../models/UserProfile")
+const UserEmergencyContact = require("../models/UserEmergencyContact")
+const Location = require("../models/Location");
 const customErrorMsg = require("../utilities/custom-error-msg");
 const sendEmail = require("../utilities/send-mail");
 const JwtService = require("../utilities/jwt-service");
-const { JWT_SECRET } = require("../config");
-const { findOne } = require("../models/RegisterUser");
 
 // User Register
 const registerUser = async (req, res, next) => {
@@ -130,22 +128,43 @@ const mailVerifiacation = async (req, res, next) => {
         next(err);
     }
 };
-// User Details
-const userDetails = async (req, res, next) => {
+// User Profile
+const userProfile = async (req, res, next) => {
     try {
-        const { userId } = req.params;
-        const user = await RegisterUser.findById(userId);
-        if (!user)
+        const {
+            title,
+            firstName,
+            middleName,
+            surName,
+            phone,
+            passportId,
+            nationalId,
+            address,
+        } = req.body;
+        const registerUser = await RegisterUser.findOne({_id: req.params.userId});
+        if (!registerUser)
             return next(customErrorMsg.notAccept("You are not registerd"));
-        const userData = new UserDetails({
-            userId: user._id,
-            ...req.body,
+        const userProfile = await UserProfile.findOne({ userId: req.params.userId })
+        if (userProfile)
+            return next(customErrorMsg.notAccept("User Details Alredy exist Please update"))
+        const newUserProfile = new UserProfile({
+            userId: registerUser._id,
+            title: title,
+            firstName: firstName,
+            middleName: middleName,
+            surName: surName,
+            phone: phone,
+            passportId: passportId,
+            nationalId: nationalId,
+            address: address,
+            createAt: Date.now(),
+            updateAt: Date.now()
         });
-        await userData.save();
+        await newUserProfile.save();
         res.status(200).json({
             success: true,
             msg: "User details submit successfully",
-            userData,
+            newUserProfile,
         });
     } catch (err) {
         next(err);
@@ -157,11 +176,18 @@ const userEmergency = async (req, res, next) => {
     try {
         const { userId } = req.params;
         const user = await RegisterUser.findOne({ _id: userId });
-        if (!user) return next(customErrorMsg.notAccept("User not found!"));
+        if (!user) return next(customErrorMsg.notAccept("You are not registerd!"));
 
-        const emergencyData = new UserEmergency({
+        const existEmergencyData = await UserEmergencyContact.findOne({ userId: userId })
+        if (existEmergencyData)
+            return next(customErrorMsg.notAccept("Emergency data already exist, Please update!"))
+
+        const emergencyData = new UserEmergencyContact({
             userId: userId,
             ...req.body,
+            createAt: Date.now(),
+            updateAt: Date.now()
+            
         });
 
         await emergencyData.save();
@@ -191,18 +217,20 @@ const loginUser = async (req, res, next) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
             return next(customErrorMsg.notAccept("Worng email or password"));
+        if (user.isVerified === false)
+            return next(customErrorMsg.notAccept("Please verify your email!"));
 
         const payload = {
             id: user._id,
             email: user.email,
         };
         const accessToken = JwtService.sign(payload);
-        const userDetails = await UserDetails.findOne({ userId: user._id });
-        const userEmergency = await UserEmergency.findOne({
-                userId: user._id,
-            });
+        const userProfile = await UserProfile.findOne({ userId: user._id })
+        const userEmergency = await UserEmergencyContact.findOne({
+            userId: user._id,
+        });
 
-        const location = await Location.findOne({ userId: user._id })
+        const location = await Location.findOne({ userId: user._id });
 
         res.status(200).json({
             success: true,
@@ -212,7 +240,7 @@ const loginUser = async (req, res, next) => {
             devaiceId: user.deviceId,
             location: location ?? null,
             active: user.active,
-            userDetails: userDetails ?? null,
+            userDetails: userProfile ?? null,
             userEmergency: userEmergency ?? null,
         });
     } catch (err) {
@@ -298,13 +326,11 @@ const changePassword = async (req, res, next) => {
         user.password = hashPassword;
         await user.save();
 
-        const userDetails = await UserDetails.findOne({
-            userId: req.params.userId,
-        });
-        if (!userDetails)
+        const userProfile = await UserProfile.findOne({ userId: req.params.userId })
+        if (!userProfile)
             return next(customErrorMsg.notFound("User details not found!"));
-        userDetails.password = hashPassword;
-        await userDetails.save();
+        userProfile.password = hashPassword;
+        await userProfile.save();
 
         res.status(200).json({
             success: true,
@@ -332,9 +358,9 @@ const userUpdateDetails = async (req, res, next) => {
             address,
         } = req.body;
 
-        const userData = await UserDetails.findOneAndUpdate({
-            userId: req.params.userId,
-        });
+        const userData = await UserProfile.findOne({
+            userId: req.params.userId
+        })
         if (!userData) return next(customErrorMsg.notFound("User not found!"));
 
         userData.title = title ?? userData.title;
@@ -345,6 +371,7 @@ const userUpdateDetails = async (req, res, next) => {
         userData.passportId = passportId ?? userData.passportId;
         userData.nationalId = nationalId ?? userData.nationalId;
         userData.address = address ?? userData.address;
+        userData.updateAt = Date.now()
         await userData.save();
         res.status(200).json({
             success: true,
@@ -361,7 +388,7 @@ const updateEmergencyContact = async (req, res, next) => {
     try {
         const { title, firstName, middleName, surName, phone, relation } =
             req.body;
-        const emergencyData = await UserEmergency.findOneAndUpdate({
+        const emergencyData = await UserEmergencyContact.findOne({
             userId: req.params.userId,
         });
         if (!emergencyData)
@@ -373,6 +400,7 @@ const updateEmergencyContact = async (req, res, next) => {
         emergencyData.surName = surName ?? emergencyData.surName;
         emergencyData.phone = phone ?? emergencyData.phone;
         emergencyData.relation = relation ?? emergencyData.relation;
+        emergencyData.updateAt = Date.now()
         await emergencyData.save();
         res.status(200).json({
             success: true,
@@ -404,11 +432,10 @@ const userUpdateDetailsByPut = async (req, res, next) => {
         if (!user)
             return next(
                 customErrorMsg.notFound("User not found, Please register")
-            );
-
-        const userData = await UserDetails.findById(req.params.userId);
+            )
+        const userData = await UserProfile.findById(req.params.userId)
         if (!userData) {
-            const newUserData = new UserDetails({
+            const newUserData = new UserProfile({
                 ...req.body,
             });
             await newUserData.save();
@@ -448,9 +475,9 @@ const updateEmergencyContactByPut = async (req, res, next) => {
             return next(
                 customErrorMsg.notFound("User not found, Please register")
             );
-        const emergencyData = await UserEmergency.findById(req.params.userId);
+        const emergencyData = await UserEmergencyContact.findById(req.params.userId);
         if (!emergencyData) {
-            const newEmergencyData = new UserEmergency({
+            const newEmergencyData = new UserEmergencyContact({
                 ...req.body,
             });
             await newEmergencyData.save();
@@ -489,13 +516,13 @@ const deleteUser = async (req, res, next) => {
         if (!registedUser)
             return next(customErrorMsg.notFound("User not found!"));
         await registedUser.remove();
-        const detailsUser = await UserDetails.findByIdAndDelete(
+        const userProfile = await UserProfile.findByIdAndDelete(
             req.params.userId
         );
-        if (!detailsUser)
+        if (!userProfile)
             return next(customErrorMsg.notFound("User not found!"));
-        await detailsUser.remove();
-        const emergencyUser = await UserEmergency.findByIdAndDelete(
+        await userProfile.remove();
+        const emergencyUser = await UserEmergencyContact.findByIdAndDelete(
             req.params.userId
         );
         if (!emergencyUser)
@@ -513,19 +540,37 @@ const deleteUser = async (req, res, next) => {
 const getSingleUser = async (req, res, next) => {
     try {
         const userData = await RegisterUser.findById(req.user.id);
-
-        const userDetails = await UserDetails.findOne({ userId: req.user.id });
-        console.log(userDetails);
-        const userEmergency = await UserEmergency.findOne({
+        const userProfile = await UserProfile.findOne({ userId: req.user.id });
+        const userEmergency = await UserEmergencyContact.findOne({
             userId: req.user.id,
         });
+        const location = await Location.findOne({ userId: req.user.id });
 
         res.status(200).json({
             success: true,
             token: req.token,
             userId: userData._id,
-            userDetails: userDetails ?? null,
+            location: location ?? null,
+            userDetails: userProfile ?? null,
             userEmergency: userEmergency ?? null,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+/**
+ *
+ *
+ */
+const updateGeofence = async (req, res, next) => {
+    try {
+        const user = await RegisterUser.findOne({ _id: req.user.id });
+        user.geofence = req.body.geofence;
+        await user.save();
+        res.status(200).json({
+            success: true,
+            msg: "Geofence updated",
         });
     } catch (err) {
         next(err);
@@ -536,7 +581,7 @@ module.exports = {
     registerUser,
     resendVarifiactionOtp,
     mailVerifiacation,
-    userDetails,
+    userProfile,
     userEmergency,
     loginUser,
     forgetPassowrdOtpSender,
@@ -548,4 +593,5 @@ module.exports = {
     updateEmergencyContactByPut,
     deleteUser,
     getSingleUser,
+    updateGeofence,
 };

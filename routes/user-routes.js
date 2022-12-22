@@ -8,11 +8,11 @@ const {
     registerUserValidationHandler,
 } = require("../utilities/register-user-validator");
 
-// User Details Validators
+// User Profile Validators
 const {
-    userDetailsValidator,
-    userDetailsValidationHandler,
-} = require("../utilities/user-details-validator");
+    userProfileValidator,
+    userProfileValidationHandler
+} = require("../utilities/user-profile-validator")
 
 // User Emergency Validators
 const {
@@ -21,8 +21,14 @@ const {
 } = require("../utilities/user-emergency-validator");
 
 // Import User Authenticated Middleware
-const { isAuthenticated, authorizeRoles, singleUserAuthenticate } = require("../middlewares/is-autenticated");
+const {
+    isAuthenticated,
+    singleUserAuthenticate
+} = require("../middlewares/is-autenticated");
 
+/**
+ * Setup Controllers
+*/
 // Register Route
 router.post(
     "/register",
@@ -30,11 +36,6 @@ router.post(
     registerUserValidationHandler,
     userControllers.registerUser
 );
-
-router.post("/resister", (req, res) => {
-    res.status(200).json(req.body);
-});
-
 // Resend Verification Route
 router.put("/resend/:userId", userControllers.resendVarifiactionOtp);
 
@@ -44,10 +45,10 @@ router.post("/verify/:userId", userControllers.mailVerifiacation);
 // User Details Route
 router.post(
     "/details/:userId",
-    userDetailsValidator,
-    userDetailsValidationHandler,
-    userControllers.userDetails
-);
+    userProfileValidator,
+    userProfileValidationHandler,
+    userControllers.userProfile
+)
 
 // User Emergency contact Route
 router.post(
@@ -65,9 +66,7 @@ router.patch(
     "/details/update/:userId",
     isAuthenticated,
     userControllers.userUpdateDetails
-);
-
-router.put("")
+)
 
 // User Update Emergency Contact Route
 router.patch(
@@ -90,5 +89,7 @@ router.post("/check/forgetOtp/:userId", userControllers.forgetPasswordOtpChecker
 
 // Forget Password
 router.post("/forget/:userId", userControllers.changePassword)
+
+router.patch("/update/geofance",isAuthenticated, userControllers.updateGeofence)
 
 module.exports = router;

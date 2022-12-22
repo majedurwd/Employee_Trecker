@@ -22,6 +22,10 @@ const registerUserValidator = [
     check("deviceId", "Device Id is required")
         .notEmpty()
         .withMessage("Device Id is required")
+        .custom(async (value) => {
+            const existDeviceId = await RegisterUser.findOne({ deviceId: value })
+            if(existDeviceId) throw new Error("This device already used")
+        })
         .trim(),
 ];
 

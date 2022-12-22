@@ -1,29 +1,27 @@
-const { Schema, model } = require("mongoose")
+const { Schema, model } = require("mongoose");
 
 const locationSchema = new Schema({
-    location: [
-        {
-            userId: {
-                type: Schema.Types.ObjectId,
-                ref: "RegisterUser"
-            },
-            lat: {
-                type: String,
-                required: true
-            },
-            long: {
-                type: String,
-                required: true
-            },
-            radius: {
-                type: String,
-                required: true
-            }
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "RegisterUser",
+    },
+    lat: {
+        type: String,
+        default: 26.0289243,
+        required: true,
+    },
+    long: {
+        type: String,
+        default: 88.4682187,
+        required: true,
+    },
+    radius: {
+        type: String,
+        default: 200,
+        required: true,
 
-        }
-    ]
-})
+    },
+});
 
-
-const Location = model("Location", locationSchema)
-module.exports = Location
+const Location = model("Location", locationSchema);
+module.exports = Location;

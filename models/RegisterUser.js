@@ -4,8 +4,7 @@ const registerSchema = new Schema({
     email: {
         type: String,
         require: true,
-        // unique: [true, "this email already exist"]
-        unique: false,
+        unique: true,
     },
     password: {
         type: String,
@@ -28,7 +27,12 @@ const registerSchema = new Schema({
     },
     active: {
         type: Boolean,
-        default: true
+        default: true,
+    },
+    geofence: {
+        type: String,
+        enum: ["IN_AREA", "NOT_IN_AREA", "NOT_RESPONDING"],
+        default: "NOT_RESPONDING",
     },
     otp: Number,
     otpExpire: Date,
